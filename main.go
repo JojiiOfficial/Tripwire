@@ -16,7 +16,7 @@ type argT struct {
 	Port       int    `cli:"*p,port" usage:"Specify the port to apply the wire to"`
 	Output     string `cli:"o,output" usage:"Specify log file path"`
 	DeleteRule bool   `cli:"d,delete" usage:"wether to delete the rule"`
-	LogLevel   int    `cli:"l,log-level" usage:"Specify the log level"`
+	LogLevel   int    `cli:"l,log-level" usage:"Specify the log level" deft:"6"`
 }
 
 func main() {
