@@ -45,7 +45,7 @@ func main() {
 			runCommand(errorHandler, "iptables -F "+ChainName)
 			runCommand(errorHandler, "iptables -X "+ChainName)
 			runCommand(errorHandler, "rm /etc/rsyslog.d/"+ChainName)
-			runCommand(errorHandler, "systemctl reload rsyslog")
+			runCommand(errorHandler, "systemctl restart rsyslog.service")
 			fmt.Println("Deleted chain " + ChainName + " successfully")
 		} else {
 			if len(argv.Output) == 0 {
@@ -65,7 +65,7 @@ func main() {
 			runCommand(errorHandler, "iptables -A "+ChainName+" -j LOG --log-prefix "+LogIdentifier+" --log-level "+strconv.Itoa(argv.LogLevel))
 			runCommand(errorHandler, "iptables -A "+ChainName+" -j "+ruleAction)
 			runCommand(errorHandler, "echo \":msg,contains,"+LogIdentifier+" /var/log/"+argv.Output+"\" > /etc/rsyslog.d/"+ChainName)
-			runCommand(errorHandler, "systemctl reload rsyslog")
+			runCommand(errorHandler, "systemctl restart rsyslog")
 			fmt.Println("Created chain " + ChainName + " successfully")
 		}
 		fmt.Println("Done")

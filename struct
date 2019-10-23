@@ -28,10 +28,10 @@ DeleteRule: false ?
     iptables -A $ChainName -j DROP //Add drop rule
 
     echo :msg,contains,"$LogIdentifier" /var/log/$LogFile > /etc/rsyslog.d/$ChainName.conf //Filter the output from the rule by using a special file with rsyslog
-    service rsyslog reload
+    systemctl restart rsyslog.service
 
 :
 iptables -F $ChainName
 iptables -X $ChainName
 rm /etc/rsyslog.d/$ChainName.conf
-systemctl reload rsyslog
+systemctl restart rsyslog.service
