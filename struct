@@ -1,0 +1,37 @@
+tripwire usage:
+
+--accept (-a) => Specify wether to drop or accept the incoming connections
+--output (-o) => Specify log file path
+--port (-p) => Specify port(s) to apply the wire 
+--delete (-d) => wether to delete the rule
+--log-level (-l) => Specify the log level
+
+vars:
+bool AcceptConnections
+string LogFile
+int Port
+int LogLevel
+bool DeleteRule
+
+make string ChainName => $"{Port}{Drop/Accept}"
+make string LogIdentifier => ChainName
+
+DeleteRule: false ?
+
+    iptables -N $ChainName //Creates IP Tables Chain
+    iptables -A $ChainName -j LOG --log-prefix $LogIdentifier --log-level $LogLevel //Add log rule
+
+    AcceptConnections
+    ? 
+    iptables -A LOG_ACCEPT -j ACCEPT  //Add accept rule
+    : 
+    iptables -A LOG_ACCEPT -j DROP //Add drop rule
+
+    echo :msg,contains,"$LogIdentifier" /var/log/$LogFile > /etc/rsyslog.d/$ChainName.conf //Filter the output from the rule by using a special file with rsyslog
+    systemctl reload rsyslog
+
+:
+iptables -F $ChainName
+iptables -X $ChainName
+rm /etc/rsyslog.d/$ChainName.conf
+systemctl reload rsyslog
