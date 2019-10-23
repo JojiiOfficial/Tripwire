@@ -12,7 +12,7 @@ import (
 
 type argT struct {
 	cli.Helper
-	Accept     bool   `cli:"*a,accept" usage:"Specify wether to drop or accept the incoming connections"`
+	Accept     bool   `cli:"a,accept" usage:"Specify wether to drop or accept the incoming connections"`
 	Port       int    `cli:"*p,port" usage:"Specify the port to apply the wire to"`
 	Output     string `cli:"o,output" usage:"Specify log file path"`
 	DeleteRule bool   `cli:"d,delete" usage:"wether to delete the rule"`
@@ -27,10 +27,6 @@ func main() {
 			fmt.Println("You need to be root!")
 			os.Exit(1)
 			return nil
-		}
-		ruleAction := "ACCEPT"
-		if !argv.Accept {
-			ruleAction = "DROP"
 		}
 
 		ChainName := "Tripwire\\[" + strconv.Itoa(argv.Port) + "\\]"
@@ -48,6 +44,10 @@ func main() {
 			runCommand(errorHandler, "systemctl restart rsyslog.service")
 			fmt.Println("Deleted chain " + ChainName + " successfully")
 		} else {
+			ruleAction := "ACCEPT"
+			if !argv.Accept {
+				ruleAction = "DROP"
+			}
 			if len(argv.Output) == 0 {
 				fmt.Println("You need to set the outputfile. Use the -o or --output argument")
 				return nil
