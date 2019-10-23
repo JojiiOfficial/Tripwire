@@ -23,12 +23,12 @@ DeleteRule: false ?
 
     AcceptConnections
     ? 
-    iptables -A LOG_ACCEPT -j ACCEPT  //Add accept rule
+    iptables -A $ChainName -j ACCEPT  //Add accept rule
     : 
-    iptables -A LOG_ACCEPT -j DROP //Add drop rule
+    iptables -A $ChainName -j DROP //Add drop rule
 
     echo :msg,contains,"$LogIdentifier" /var/log/$LogFile > /etc/rsyslog.d/$ChainName.conf //Filter the output from the rule by using a special file with rsyslog
-    systemctl reload rsyslog
+    service rsyslog reload
 
 :
 iptables -F $ChainName

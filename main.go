@@ -63,7 +63,7 @@ func main() {
 			}
 			runCommand(errorHandler, "iptables -N "+ChainName)
 			runCommand(errorHandler, "iptables -A "+ChainName+" -j LOG --log-prefix "+LogIdentifier+" --log-level "+strconv.Itoa(argv.LogLevel))
-			runCommand(errorHandler, "iptables -A LOG_ACCEPT -j "+ruleAction)
+			runCommand(errorHandler, "iptables -A "+ChainName+" -j "+ruleAction)
 			runCommand(errorHandler, "echo \":msg,contains,"+LogIdentifier+" /var/log/"+argv.Output+"\" > /etc/rsyslog.d/"+ChainName)
 			runCommand(errorHandler, "systemctl reload rsyslog")
 			fmt.Println("Created chain " + ChainName + " successfully")
