@@ -30,7 +30,7 @@ func main() {
 		}
 
 		ChainName := "Tripwire\\[" + strconv.Itoa(argv.Port) + "\\]"
-		LogIdentifier := ChainName
+		LogIdentifier := "Tripwire" + strconv.Itoa(argv.Port)
 
 		errorHandler := func(err error, cmd string) {
 			fmt.Println("Error running " + cmd + ": " + err.Error())
@@ -64,14 +64,10 @@ func main() {
 				fmt.Println("This port already has a rule! Try deleting it with -d")
 				return nil
 			}
-			confFile := argv.Output
-			if !strings.HasPrefix(confFile, ".conf") {
-				confFile = confFile + ".conf"
-			}
 			runCommand(errorHandler, "iptables -N "+ChainName)
 			runCommand(errorHandler, "iptables -A "+ChainName+" -j LOG --log-prefix "+LogIdentifier+" --log-level "+strconv.Itoa(argv.LogLevel))
 			runCommand(errorHandler, "iptables -A "+ChainName+" -j "+ruleAction)
-			runCommand(errorHandler, "echo \":msg,contains,"+LogIdentifier+" /var/log/"+confFile+"\" > /etc/rsyslog.d/"+ChainName)
+			runCommand(errorHandler, "echo \":msg,contains,"+LogIdentifier+" /var/log/"+argv.Output+"conf\" > /etc/rsyslog.d/"+ChainName+".conf")
 			runCommand(errorHandler, "systemctl restart rsyslog")
 			fmt.Println("Created chain " + ChainName + " successfully")
 		}
