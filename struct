@@ -8,7 +8,7 @@ tripwire usage:
 
 vars:
 bool AcceptConnections = false
-string LogFile = ChainName
+string LogFile = /var/log/$ChainName
 int Port
 int LogLevel = 6
 bool DeleteRule = false
@@ -27,7 +27,7 @@ DeleteRule: false ?
     : 
     iptables -A $ChainName --dport 3306 --jump DROP //Add drop rule
 
-    echo :msg,contains,"$LogIdentifier" /var/log/$LogFile > /etc/rsyslog.d/$ChainName.conf //Filter the output from the rule by using a special file with rsyslog
+    echo if $msg contains '$LogIdentifier' then $LogFile > /etc/rsyslog.d/$ChainName.conf //Filter the output from the rule by using a special file with rsyslog
     systemctl restart rsyslog.service
 
 :
