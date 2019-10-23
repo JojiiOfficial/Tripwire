@@ -38,6 +38,10 @@ func main() {
 		}
 
 		if argv.DeleteRule {
+			if chainExisits(ChainName) != nil {
+				fmt.Println("Chain doesn't exist")
+				return nil
+			}
 			runCommand(errorHandler, "iptables -F "+ChainName)
 			runCommand(errorHandler, "iptables -X "+ChainName)
 			runCommand(errorHandler, "rm /etc/rsyslog.d/"+ChainName)
@@ -56,10 +60,13 @@ func main() {
 				fmt.Println("You port must be between 0 and 65535!")
 				return nil
 			}
-			err := chainExisits(ChainName)
-			if err == nil {
+			if chainExisits(ChainName) == nil {
 				fmt.Println("This port already has a rule! Try deleting it with -d")
 				return nil
+			}
+			confFile := argv.Output
+			if !strings.HasPrefix(confFile, ".conf") {
+				confFile = confFile + ".conf"
 			}
 			runCommand(errorHandler, "iptables -N "+ChainName)
 			runCommand(errorHandler, "iptables -A "+ChainName+" -j LOG --log-prefix "+LogIdentifier+" --log-level "+strconv.Itoa(argv.LogLevel))
@@ -87,12 +94,15 @@ func chainExisits(chainName string) error {
 
 func runCommand(errorHandler func(error, string), sCmd string) (outb string, err error) {
 	out, err := exec.Command("su", "-c", sCmd).Output()
-	fmt.Println(string(out))
+	output := string(out)
+	if len(strings.ReplaceAll(strings.Trim(output, " "), "\n", "")) > 0 {
+		fmt.Println(output)
+	}
 	if err != nil {
 		if errorHandler != nil {
 			errorHandler(err, sCmd)
 		}
 		return "", err
 	}
-	return string(out), nil
+	return output, nil
 }
