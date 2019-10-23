@@ -7,25 +7,25 @@ tripwire usage:
 --log-level (-l) => Specify the log level
 
 vars:
-bool AcceptConnections
-string LogFile
+bool AcceptConnections = false
+string LogFile = ChainName
 int Port
-int LogLevel
-bool DeleteRule
+int LogLevel = 6
+bool DeleteRule = false
 
-make string ChainName => $"{Port}{Drop/Accept}"
-make string LogIdentifier => ChainName
+make string ChainName => $"Tripwire[$Port]"
+make string LogIdentifier => Tripwire$Port
 
 DeleteRule: false ?
 
     iptables -N $ChainName //Creates IP Tables Chain
-    iptables -A $ChainName -j LOG --log-prefix $LogIdentifier --log-level $LogLevel //Add log rule
+    iptables -A $ChainName --dport $Port -m state --state NEW -j LOG --log-prefix $LogIdentifier --log-level $LogLevel //Add log rule
 
     AcceptConnections
     ? 
-    iptables -A $ChainName -j ACCEPT  //Add accept rule
+    iptables -A $ChainName --dport 3306 --jump ACCEPT //Add accept rule
     : 
-    iptables -A $ChainName -j DROP //Add drop rule
+    iptables -A $ChainName --dport 3306 --jump DROP //Add drop rule
 
     echo :msg,contains,"$LogIdentifier" /var/log/$LogFile > /etc/rsyslog.d/$ChainName.conf //Filter the output from the rule by using a special file with rsyslog
     systemctl restart rsyslog.service
