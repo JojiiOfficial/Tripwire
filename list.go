@@ -29,7 +29,7 @@ var list = &cli.Command{
 			return nil
 		}
 		lines := strings.Split(list, "\n")
-		fmt.Println("\033[1;32m\tName\033[0m  \t\t\t\033[1;32m   Logfile\033[0m")
+		fmt.Println("\033[1;32m\tPort\033[0m  \t\t\t\033[1;32m Logfile\033[0m")
 		len := 0
 		for _, line := range lines {
 			if strings.HasPrefix(line, "Chain Tripwire") {
