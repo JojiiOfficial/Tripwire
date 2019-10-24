@@ -21,4 +21,5 @@ Specifies the <b>[loglevel](https://highly.illegal-dark-web-server.xyz/i/qszvm-3
 <br>
 <b>Delete</b> log and iptable rules for port 21
 <br>```#./tripwire -d -p21```
-
+<b>Listing</b> all tripwires
+<br>```#./tripwire list```
