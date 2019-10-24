@@ -30,7 +30,7 @@ func main() {
 		}
 
 		ChainName := "Tripwire" + strconv.Itoa(argv.Port)
-		LogIdentifier := "Tripwire" + strconv.Itoa(argv.Port)
+		LogIdentifier := "Tripwire" + strconv.Itoa(argv.Port) + " "
 
 		errorHandler := func(err error, cmd string) {
 			fmt.Println("Error running " + cmd + ": " + err.Error())
