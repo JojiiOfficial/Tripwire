@@ -16,9 +16,10 @@ type deleteT struct {
 }
 
 var deleteCMD = &cli.Command{
-	Name: "delete",
-	Desc: "Deletes a tripwire chain",
-	Argv: func() interface{} { return new(deleteT) },
+	Name:    "delete",
+	Aliases: []string{"del", "d"},
+	Desc:    "Deletes a tripwire chain",
+	Argv:    func() interface{} { return new(deleteT) },
 	Fn: func(ctx *cli.Context) error {
 		argv := ctx.Argv().(*deleteT)
 		ChainName := generateChainname(argv.Port)

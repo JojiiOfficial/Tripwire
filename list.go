@@ -18,9 +18,10 @@ type argList struct {
 }
 
 var list = &cli.Command{
-	Name: "list",
-	Desc: "Lists all tripwires",
-	Argv: func() interface{} { return new(argList) },
+	Name:    "list",
+	Aliases: []string{"l"},
+	Desc:    "Lists all tripwires",
+	Argv:    func() interface{} { return new(argList) },
 	Fn: func(ctx *cli.Context) error {
 		argv := ctx.Argv().(*argList)
 		list, err := runCommand(errorHandler, "iptables -L")
