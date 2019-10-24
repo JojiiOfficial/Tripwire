@@ -48,9 +48,9 @@ func main() {
 			runCommand(errorHandler, "rm /etc/rsyslog.d/"+ChainName+".conf")
 			runCommand(errorHandler, "systemctl restart rsyslog.service")
 			if argv.OutputFile != "/var/log/<ChainName>" {
-				if _, err := os.Stat("/var/log/" + ChainName); err == nil {
-					runCommand(errorHandler, "/var/log/"+ChainName)
-					fmt.Println("Deleted logfile /var/log/" + ChainName)
+				if _, err := os.Stat("/var/log/" + argv.OutputFile); err == nil {
+					runCommand(errorHandler, "rm /var/log/"+argv.OutputFile)
+					fmt.Println("Deleted logfile /var/log/" + argv.OutputFile)
 				}
 			}
 			fmt.Println("Deleted chain " + ChainName + " successfully")
