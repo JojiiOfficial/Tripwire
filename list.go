@@ -27,6 +27,7 @@ var list = &cli.Command{
 			fmt.Println("No tripwire chain found")
 			return nil
 		}
+		fmt.Println("\033[1;32m\tName\033[0m  \t\t\t\033[1;32m   Logfile\033[0m")
 		for _, line := range lines {
 			if strings.HasPrefix(line, "Chain Tripwire") {
 				viewChain(strings.Trim(strings.Split(line, " ")[1], " "))
@@ -44,7 +45,7 @@ func viewChain(chainName string) {
 	ChainName := generateChainname(port)
 	LogFile, err := readFile("/etc/rsyslog.d/" + ChainName + ".conf")
 	LogFile = strings.Trim(strings.Split(LogFile, "then")[1], " ")
-	fmt.Println("Tripwire on port " + strconv.Itoa(port) + "\t--->  " + LogFile)
+	fmt.Println("Tripwire on port " + strconv.Itoa(port) + "\033[1;37m\t--->\033[0m  " + LogFile)
 }
 
 func readFile(file string) (string, error) {
