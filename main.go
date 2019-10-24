@@ -16,7 +16,7 @@ type argT struct {
 	Port       int    `cli:"*p,port" usage:"Specify the port to apply the wire to"`
 	Output     string `cli:"o,output" usage:"Specify log file path"`
 	DeleteRule bool   `cli:"d,delete" usage:"wether to delete the rule"`
-	LogLevel   int    `cli:"l,log-level" usage:"Specify the log level" deft:"6"`
+	LogLevel   int    `cli:"l,log-level" usage:"Specify the log level" dft:"6"`
 }
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 			return nil
 		}
 
-		ChainName := "Tripwire\\[" + strconv.Itoa(argv.Port) + "\\]"
+		ChainName := "Tripwire" + strconv.Itoa(argv.Port)
 		LogIdentifier := "Tripwire" + strconv.Itoa(argv.Port)
 
 		errorHandler := func(err error, cmd string) {
@@ -44,7 +44,7 @@ func main() {
 			}
 			runCommand(errorHandler, "iptables -F "+ChainName)
 			runCommand(errorHandler, "iptables -X "+ChainName)
-			runCommand(errorHandler, "rm /etc/rsyslog.d/"+ChainName)
+			runCommand(errorHandler, "rm /etc/rsyslog.d/"+ChainName+".conf")
 			runCommand(errorHandler, "systemctl restart rsyslog.service")
 			fmt.Println("Deleted chain " + ChainName + " successfully")
 		} else {
@@ -66,7 +66,7 @@ func main() {
 				return nil
 			}
 			runCommand(errorHandler, "iptables -N "+ChainName)
-			runCommand(errorHandler, "iptables -A "+ChainName+" -j LOG --log-prefix "+LogIdentifier+" --log-level "+strconv.Itoa(argv.LogLevel))
+			runCommand(errorHandler, "iptables -A "+ChainName+" -p tcp -m tcp -m state --state NEW --dport "+strconv.Itoa(argv.Port)+" -j LOG --log-prefix \""+LogIdentifier+"\" --log-level "+strconv.Itoa(argv.LogLevel))
 			runCommand(errorHandler, "iptables -A "+ChainName+" -j "+ruleAction)
 			runCommand(errorHandler, "iptables -I INPUT -j "+ChainName)
 			runCommand(errorHandler, "echo \":msg,contains,"+LogIdentifier+" /var/log/"+argv.Output+"\" > /etc/rsyslog.d/"+ChainName+".conf")

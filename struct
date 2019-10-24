@@ -19,13 +19,14 @@ make string LogIdentifier => Tripwire$Port
 DeleteRule: false ?
 
     iptables -N $ChainName //Creates IP Tables Chain
-    iptables -A $ChainName --dport $Port -m state --state NEW -j LOG --log-prefix $LogIdentifier --log-level $LogLevel //Add log rule
+    iptables -A $ChainName --dport $Port -m state --state NEW --dport $Port -j LOG --log-prefix $LogIdentifier --log-level $LogLevel //Add log rule
 
     AcceptConnections
     ? 
     iptables -A $ChainName --dport 3306 --jump ACCEPT //Add accept rule
     : 
     iptables -A $Chain Name --dport 3306 --jump DROP //Add drop rule
+    
     iptables -I INPUT -j $ChainName
 
     echo if $msg contains '$LogIdentifier' then $LogFile > /etc/rsyslog.d/$ChainName.conf //Filter the output from the rule by using a special file with rsyslog
