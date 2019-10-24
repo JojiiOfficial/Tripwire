@@ -10,6 +10,16 @@ import (
 	"github.com/mkideal/cli"
 )
 
+func main() {
+	if err := cli.Root(root,
+		cli.Tree(help),
+		cli.Tree(list),
+	).Run(os.Args[1:]); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
 type argT struct {
 	cli.Helper
 	Accept     bool   `cli:"a,accept" usage:"Specify wether to drop or accept the incoming connections"`
@@ -19,23 +29,24 @@ type argT struct {
 	LogLevel   int    `cli:"l,log-level" usage:"Specify the log level" dft:"6"`
 }
 
-func main() {
-	cli.RunWithArgs(new(argT), os.Args, func(ctx *cli.Context) error {
+var help = cli.HelpCommand("display help information")
+var errorHandler = func(err error, cmd string) {
+	fmt.Println("Error running " + cmd + ": " + err.Error())
+	os.Exit(2)
+}
+var root = &cli.Command{
+	Desc: "this is root command",
+	Argv: func() interface{} { return new(argT) },
+	Fn: func(ctx *cli.Context) error {
 		argv := ctx.Argv().(*argT)
-		_ = argv
 		if os.Getuid() != 0 {
 			fmt.Println("You need to be root!")
 			os.Exit(1)
 			return nil
 		}
 
-		ChainName := "Tripwire" + strconv.Itoa(argv.Port)
-		LogIdentifier := "Tripwire" + strconv.Itoa(argv.Port) + " "
-
-		errorHandler := func(err error, cmd string) {
-			fmt.Println("Error running " + cmd + ": " + err.Error())
-			os.Exit(2)
-		}
+		ChainName := generateChainname(argv.Port)
+		LogIdentifier := ChainName + " "
 
 		if argv.DeleteRule {
 			if chainExisits(ChainName) != nil {
@@ -69,7 +80,7 @@ func main() {
 			}
 			outFile := argv.OutputFile
 			if argv.OutputFile == "/var/log/<ChainName>" {
-				outFile = "/var/log/" + ChainName
+				outFile = ChainName
 			}
 			runCommand(errorHandler, "iptables -N "+ChainName)
 			runCommand(errorHandler, "iptables -A "+ChainName+" -p tcp -m tcp -m state --state NEW --dport "+strconv.Itoa(argv.Port)+" -j LOG --log-prefix \""+LogIdentifier+"\" --log-level "+strconv.Itoa(argv.LogLevel))
@@ -84,7 +95,7 @@ func main() {
 		fmt.Println("Done")
 
 		return nil
-	})
+	},
 }
 
 func deleteRuleForChain(errorHandler func(error, string), chainName string) {
@@ -132,4 +143,8 @@ func runCommand(errorHandler func(error, string), sCmd string) (outb string, err
 		return "", err
 	}
 	return output, nil
+}
+
+func generateChainname(port int) string {
+	return "Tripwire" + strconv.Itoa(port)
 }
