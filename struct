@@ -25,7 +25,8 @@ DeleteRule: false ?
     ? 
     iptables -A $ChainName --dport 3306 --jump ACCEPT //Add accept rule
     : 
-    iptables -A $ChainName --dport 3306 --jump DROP //Add drop rule
+    iptables -A $Chain Name --dport 3306 --jump DROP //Add drop rule
+    iptables -I INPUT -j $ChainName
 
     echo if $msg contains '$LogIdentifier' then $LogFile > /etc/rsyslog.d/$ChainName.conf //Filter the output from the rule by using a special file with rsyslog
     systemctl restart rsyslog.service

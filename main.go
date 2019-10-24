@@ -49,6 +49,7 @@ func main() {
 			fmt.Println("Deleted chain " + ChainName + " successfully")
 		} else {
 			ruleAction := "ACCEPT"
+			fmt.Println(argv.LogLevel)
 			if !argv.Accept {
 				ruleAction = "DROP"
 			}
@@ -67,7 +68,8 @@ func main() {
 			runCommand(errorHandler, "iptables -N "+ChainName)
 			runCommand(errorHandler, "iptables -A "+ChainName+" -j LOG --log-prefix "+LogIdentifier+" --log-level "+strconv.Itoa(argv.LogLevel))
 			runCommand(errorHandler, "iptables -A "+ChainName+" -j "+ruleAction)
-			runCommand(errorHandler, "echo \":msg,contains,"+LogIdentifier+" /var/log/"+argv.Output+"conf\" > /etc/rsyslog.d/"+ChainName+".conf")
+			runCommand(errorHandler, "iptables -I INPUT -j "+ChainName)
+			runCommand(errorHandler, "echo \":msg,contains,"+LogIdentifier+" /var/log/"+argv.Output+"\" > /etc/rsyslog.d/"+ChainName+".conf")
 			runCommand(errorHandler, "systemctl restart rsyslog")
 			fmt.Println("Created chain " + ChainName + " successfully")
 		}
