@@ -14,7 +14,7 @@ type argT struct {
 	cli.Helper
 	Accept     bool   `cli:"a,accept" usage:"Specify wether to drop or accept the incoming connections"`
 	Port       int    `cli:"*p,port" usage:"Specify the port to apply the wire to"`
-	Output     string `cli:"o,output" usage:"Specify log file path"`
+	OutputFile string `cli:"o,output" usage:"Specify the logfile" dft:"/var/log/<ChainName>"`
 	DeleteRule bool   `cli:"d,delete" usage:"wether to delete the rule"`
 	LogLevel   int    `cli:"l,log-level" usage:"Specify the log level" dft:"6"`
 }
@@ -46,16 +46,17 @@ func main() {
 			runCommand(errorHandler, "iptables -X "+ChainName)
 			runCommand(errorHandler, "rm /etc/rsyslog.d/"+ChainName+".conf")
 			runCommand(errorHandler, "systemctl restart rsyslog.service")
+			if argv.OutputFile != "/var/log/<ChainName>" {
+				if _, err := os.Stat("/var/log/" + ChainName); err == nil {
+					runCommand(errorHandler, "/var/log/"+ChainName)
+					fmt.Println("Deleted logfile /var/log/" + ChainName)
+				}
+			}
 			fmt.Println("Deleted chain " + ChainName + " successfully")
 		} else {
 			ruleAction := "ACCEPT"
-			fmt.Println(argv.LogLevel)
 			if !argv.Accept {
 				ruleAction = "DROP"
-			}
-			if len(argv.Output) == 0 {
-				fmt.Println("You need to set the outputfile. Use the -o or --output argument")
-				return nil
 			}
 			if argv.Port <= 0 || argv.Port > 65535 {
 				fmt.Println("You port must be between 0 and 65535!")
@@ -65,13 +66,19 @@ func main() {
 				fmt.Println("This port already has a rule! Try deleting it with -d")
 				return nil
 			}
+			outFile := argv.OutputFile
+			if argv.OutputFile == "/var/log/<ChainName>" {
+				outFile = "/var/log/" + ChainName
+			}
 			runCommand(errorHandler, "iptables -N "+ChainName)
 			runCommand(errorHandler, "iptables -A "+ChainName+" -p tcp -m tcp -m state --state NEW --dport "+strconv.Itoa(argv.Port)+" -j LOG --log-prefix \""+LogIdentifier+"\" --log-level "+strconv.Itoa(argv.LogLevel))
-			runCommand(errorHandler, "iptables -A "+ChainName+" -j "+ruleAction)
+			runCommand(errorHandler, "iptables -A "+ChainName+" -p tcp -m tcp --dport "+strconv.Itoa(argv.Port)+" -j "+ruleAction)
 			runCommand(errorHandler, "iptables -I INPUT -j "+ChainName)
-			runCommand(errorHandler, "echo \":msg,contains,"+LogIdentifier+" /var/log/"+argv.Output+"\" > /etc/rsyslog.d/"+ChainName+".conf")
+			runCommand(errorHandler, "echo \"if \\$msg contains '"+LogIdentifier+"' then /var/log/"+outFile+"\" > /etc/rsyslog.d/"+ChainName+".conf")
 			runCommand(errorHandler, "systemctl restart rsyslog")
+			runCommand(errorHandler, "touch /var/log/"+outFile)
 			fmt.Println("Created chain " + ChainName + " successfully")
+			fmt.Println("All logs for port (" + strconv.Itoa(argv.Port) + ") will be in /var/log/" + outFile)
 		}
 		fmt.Println("Done")
 
