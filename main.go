@@ -43,6 +43,7 @@ func main() {
 				return nil
 			}
 			runCommand(errorHandler, "iptables -F "+ChainName)
+			deleteRuleForChain(errorHandler, ChainName)
 			runCommand(errorHandler, "iptables -X "+ChainName)
 			runCommand(errorHandler, "rm /etc/rsyslog.d/"+ChainName+".conf")
 			runCommand(errorHandler, "systemctl restart rsyslog.service")
@@ -86,6 +87,27 @@ func main() {
 	})
 }
 
+func deleteRuleForChain(errorHandler func(error, string), chainName string) {
+	data, _ := runCommand(errorHandler, "iptables -L INPUT --line-numbers")
+	lines := strings.Split(data, "\n")
+	for _, i := range lines {
+		if strings.HasPrefix(i, "num  target") || strings.HasPrefix(i, "Chain") || len(strings.Trim(i, " ")) == 0 {
+			continue
+		}
+		e := strings.Trim(strings.Split(i, " ")[0], " ")
+		in, err := strconv.Atoi(e)
+		if err != nil {
+			fmt.Println("Couldn't delete rule")
+			continue
+		}
+		if strings.Contains(i, chainName) {
+			fmt.Println("Deleting rule " + i)
+			runCommand(errorHandler, "iptables -D INPUT "+strconv.Itoa(in))
+			return
+		}
+	}
+}
+
 func chainExisits(chainName string) error {
 	res, err := runCommand(nil, "iptables -L "+chainName)
 	if err != nil {
@@ -101,7 +123,7 @@ func runCommand(errorHandler func(error, string), sCmd string) (outb string, err
 	out, err := exec.Command("su", "-c", sCmd).Output()
 	output := string(out)
 	if len(strings.ReplaceAll(strings.Trim(output, " "), "\n", "")) > 0 {
-		fmt.Println(output)
+		//fmt.Println(output)
 	}
 	if err != nil {
 		if errorHandler != nil {
