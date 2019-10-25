@@ -41,6 +41,14 @@ var root = &cli.Command{
 	},
 }
 
+func checkRoot() bool {
+	if os.Getuid() != 0 {
+		fmt.Println("You need to be root to run this command!")
+		return false
+	}
+	return true
+}
+
 func chainExisits(chainName string) error {
 	res, err := runCommand(nil, "iptables -L "+chainName)
 	if err != nil {

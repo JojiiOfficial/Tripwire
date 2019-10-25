@@ -17,10 +17,13 @@ type addT struct {
 
 var addCMD = &cli.Command{
 	Name:    "add",
-	Aliases: []string{"a"},
+	Aliases: []string{"a", "ad"},
 	Desc:    "Adds a tripwire chain",
 	Argv:    func() interface{} { return new(addT) },
 	Fn: func(ctx *cli.Context) error {
+		if !checkRoot() {
+			return nil
+		}
 		argv := ctx.Argv().(*addT)
 		ChainName := generateChainname(argv.Port)
 		LogIdentifier := ChainName + " "

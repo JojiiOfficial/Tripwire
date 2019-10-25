@@ -21,6 +21,9 @@ var deleteCMD = &cli.Command{
 	Desc:    "Deletes a tripwire chain",
 	Argv:    func() interface{} { return new(deleteT) },
 	Fn: func(ctx *cli.Context) error {
+		if !checkRoot() {
+			return nil
+		}
 		argv := ctx.Argv().(*deleteT)
 		ChainName := generateChainname(argv.Port)
 		if chainExisits(ChainName) != nil {
