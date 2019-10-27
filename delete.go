@@ -35,10 +35,14 @@ var deleteCMD = &cli.Command{
 		runCommand(errorHandler, "iptables -X "+ChainName)
 		runCommand(errorHandler, "rm /etc/rsyslog.d/"+ChainName+".conf")
 		runCommand(errorHandler, "systemctl restart rsyslog.service")
+		outFile := argv.OutputFile
 		if argv.OutputFile != "/var/log/<ChainName>" {
 			if _, err := os.Stat("/var/log/" + argv.OutputFile); err == nil {
-				runCommand(errorHandler, "rm /var/log/"+argv.OutputFile)
-				fmt.Println("Deleted logfile /var/log/" + argv.OutputFile)
+				if !strings.HasPrefix(outFile, "/") {
+					outFile = "/var/log/" + outFile
+				}
+				runCommand(errorHandler, "rm "+outFile)
+				fmt.Println("Deleted logfile " + outFile)
 			}
 		}
 		fmt.Println("Deleted chain " + ChainName + " successfully")
