@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/mkideal/cli"
 )
@@ -41,17 +42,20 @@ var addCMD = &cli.Command{
 		}
 		outFile := argv.OutputFile
 		if argv.OutputFile == "/var/log/<ChainName>" {
-			outFile = ChainName
+			outFile = "/var/log/" + ChainName
+		}
+		if !strings.HasPrefix(outFile, "/") {
+			outFile = "/var/log/" + outFile
 		}
 		runCommand(errorHandler, "iptables -N "+ChainName)
 		runCommand(errorHandler, "iptables -A "+ChainName+" -p tcp -m tcp -m state --state NEW --dport "+strconv.Itoa(argv.Port)+" -j LOG --log-prefix \""+LogIdentifier+"\" --log-level "+strconv.Itoa(argv.LogLevel))
 		runCommand(errorHandler, "iptables -A "+ChainName+" -p tcp -m tcp --dport "+strconv.Itoa(argv.Port)+" -j "+ruleAction)
 		runCommand(errorHandler, "iptables -I INPUT -j "+ChainName)
-		runCommand(errorHandler, "echo \"if \\$msg contains '"+LogIdentifier+"' then /var/log/"+outFile+"\" > /etc/rsyslog.d/"+ChainName+".conf")
+		runCommand(errorHandler, "echo \"if \\$msg contains '"+LogIdentifier+"' then "+outFile+"\" > /etc/rsyslog.d/"+ChainName+".conf")
 		runCommand(errorHandler, "systemctl restart rsyslog")
-		runCommand(errorHandler, "touch /var/log/"+outFile)
+		runCommand(nil, "touch "+outFile)
 		fmt.Println("Created chain " + ChainName + " successfully")
-		fmt.Println("All logs for port (" + strconv.Itoa(argv.Port) + ") will be in /var/log/" + outFile)
+		fmt.Println("All logs for port (" + strconv.Itoa(argv.Port) + ") will be in " + outFile)
 		return nil
 	},
 }
