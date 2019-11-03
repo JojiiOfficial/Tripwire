@@ -8,7 +8,7 @@ Run
 go get
 go build -o tripwire
 ```
-it was tested with go 1.13 if compiling doesn't work, try using my go version
+it was tested with go 1.13. if compiling doesn't work, try using my go version
 
 # Usage
 Show <b>help</b>
