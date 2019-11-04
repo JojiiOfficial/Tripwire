@@ -60,7 +60,16 @@ var addCMD = &cli.Command{
 		runCommand(errorHandler, "iptables -N "+ChainName)
 		runCommand(errorHandler, "iptables -A "+ChainName+" -p tcp -m tcp -m state --state NEW --dport "+strconv.Itoa(argv.Port)+" -j LOG --log-prefix \""+LogIdentifier+"\" --log-level "+strconv.Itoa(argv.LogLevel))
 		runCommand(errorHandler, "iptables -A "+ChainName+" -p tcp -m tcp --dport "+strconv.Itoa(argv.Port)+" -j "+ruleAction)
-		runCommand(errorHandler, "iptables -I INPUT -j "+ChainName)
+		ret, err := runCommand(nil, "iptables -L INPUT 2")
+		if err != nil {
+			fmt.Println("Error: " + err.Error())
+			return nil
+		}
+		if len(ret) > 0 {
+			runCommand(errorHandler, "iptables -I INPUT 2 -j "+ChainName)
+		} else {
+			runCommand(errorHandler, "iptables -I INPUT -j "+ChainName)
+		}
 		runCommand(errorHandler, "echo \"if \\$msg contains '"+LogIdentifier+"' then "+outFile+"\" > /etc/rsyslog.d/"+ChainName+".conf")
 		runCommand(errorHandler, "systemctl restart rsyslog")
 		runCommand(nil, "touch "+outFile)
