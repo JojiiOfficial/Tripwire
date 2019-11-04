@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
@@ -39,6 +41,14 @@ var addCMD = &cli.Command{
 		if chainExisits(ChainName) == nil {
 			fmt.Println("This port already has a rule! Try deleting it with -d")
 			return nil
+		}
+		if argv.Port == 22 && !argv.Accept {
+			reader := bufio.NewReader(os.Stdin)
+			y, i := confirmInput("If you continue iptables will block port 22. If you are currently logged in via SSH on port 22 you won't be able to use SSH!\nContinue? [y/n] > ", reader)
+			if i != 1 || !y {
+				fmt.Println("Exiting")
+				return nil
+			}
 		}
 		outFile := argv.OutputFile
 		if argv.OutputFile == "/var/log/<ChainName>" {
