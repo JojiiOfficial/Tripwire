@@ -1,5 +1,6 @@
 # Tripwire
 A nice usefull tool to create iptable-rules which logs all connections to a given port to detect ip-scanner and hacker.
+You can use it in combination with the [ScanBanServer](https://github.com/JojiiOfficial/ScanBanServer) and the [Tripwire-reporter](https://github.com/JojiiOfficial/Tripwire-reporter) to create a network to collect and block internet scanner
 
 # Install
 Run 
@@ -7,7 +8,7 @@ Run
 go get
 go build -o tripwire
 ```
-it was tested with go 1.13 if compiling doesn't work, try using my go version
+it was tested with go 1.13. If compiling doesn't work, try using go1.13
 
 # Usage
 Show <b>help</b>
