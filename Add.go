@@ -12,10 +12,11 @@ import (
 
 type addT struct {
 	cli.Helper
-	Accept     bool   `cli:"a,accept" usage:"Specify wether to drop or accept the incoming connections"`
-	Port       int    `cli:"*p,port" usage:"Specify the port to apply the wire to"`
-	OutputFile string `cli:"o,output" usage:"Specify the logfile" dft:"/var/log/<ChainName>"`
-	LogLevel   int    `cli:"l,log-level" usage:"Specify the log level" dft:"6"`
+	Accept         bool   `cli:"a,accept" usage:"Specify wether to drop or accept the incoming connections"`
+	Port           int    `cli:"*p,port" usage:"Specify the port to apply the wire to"`
+	OutputFile     string `cli:"o,output" usage:"Specify the logfile" dft:"/var/log/<ChainName>"`
+	LogLevel       int    `cli:"l,log-level" usage:"Specify the log level" dft:"6"`
+	RestartRsyslog bool   `cli:"r,restart" usage:"Specify if tripwire should automatically restart rsyslog" dft:"true"`
 }
 
 var addCMD = &cli.Command{
@@ -71,7 +72,9 @@ var addCMD = &cli.Command{
 			runCommand(errorHandler, "iptables -I INPUT -j "+ChainName)
 		}
 		runCommand(errorHandler, "echo \"if \\$msg contains '"+LogIdentifier+"' then "+outFile+"\" > /etc/rsyslog.d/"+ChainName+".conf")
-		runCommand(errorHandler, "systemctl restart rsyslog")
+		if argv.RestartRsyslog {
+			runCommand(errorHandler, "systemctl restart rsyslog")
+		}
 		runCommand(nil, "touch "+outFile)
 		fmt.Println("Created chain " + ChainName + " successfully")
 		fmt.Println("All logs for port (" + strconv.Itoa(argv.Port) + ") will be in " + outFile)
