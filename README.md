@@ -13,7 +13,7 @@ it was tested with go 1.13. If compiling doesn't work, try using go1.13
 # Usage
 Show <b>help</b>
 <br>```#./tripwire -h```
-<br><br>Create a rule to log and <b>allow</b> all connections to port 21 and writes them into /var/log/ftpListener.conf
+<br><br>Create a rule to log and <b>allow</b> all connections to port 21 and write them into /var/log/ftpListener.conf
 <br>```#./tripwire add -p21 -o ftpListener -a```
 <br><br>
 ...<b>Block</b> incomming connections (instead of accepting them)
@@ -25,5 +25,5 @@ Show <b>help</b>
 <b>Delete</b> log and iptable rules for port 21
 <br>```#./tripwire delete -p21 -o ftpListener```
 <br><br>
-<b>Listing</b> all tripwires
+<b>List</b> all tripwire configurations
 <br>```#./tripwire list```
