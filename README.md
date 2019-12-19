@@ -1,6 +1,6 @@
 # Tripwire
 A nice usefull tool to create iptable-rules which logs all connections to a given port to detect ip-scanner and hacker.
-You can use it in combination with the [ScanBanServer](https://github.com/JojiiOfficial/ScanBanServer) and the [Triplink](https://github.com/JojiiOfficial/triplink) to create a network to collect and block internet scanner
+You can use it in combination with the [ScanBanServer](https://github.com/JojiiOfficial/ScanBanServer) and [Triplink](https://github.com/JojiiOfficial/triplink) to create a network to collect and block internet scanner
 
 # Install
 Run 
